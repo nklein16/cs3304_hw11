@@ -1,0 +1,90 @@
+// CS 3304 - Data Structures with Dr. Gayler
+// Nathaniel Klein
+// Assignment 11 - Hashing: Redo author's table2.h with STL list class
+// Completed: 04/19/16
+
+// FILE: table2.template
+// This program implements the slightly revised table2.h
+
+#include <cassert>  // Provides ability to assert
+
+using namespace std;
+
+namespace main_savitch_12B
+{
+    template <class RecordType>
+    table<RecordType>::table()
+    {
+        total_records = 0;
+    }
+    
+    template <class RecordType>    
+    void table<RecordType>::insert(const RecordType& entry)
+    {
+        assert(entry.key >= 0);
+        std::size_t index = hash(entry.key);
+        
+        if(!is_present(entry.key)){
+            data[index].push_back(entry);
+            ++total_records;
+        }
+        else{
+            remove(entry.key);
+            data[index].push_back(entry);
+        }
+    }
+    
+    template <class RecordType>
+    void table<RecordType>::remove(int key)
+    {
+        std::size_t index = hash(key);
+        if(!is_present(key))
+            return;
+        else{
+            typename std::list<RecordType>::iterator iter;
+            for(iter = data[index].begin(); iter != data[index].end(); ++iter){
+                if(iter->key == key){
+                    data[index].erase(iter);
+                    --total_records;
+                    break;
+                }
+            }
+        }
+    }
+    
+    template <class RecordType>    
+    void table<RecordType>::find(int key, bool& found, RecordType& result) const
+    {
+        std::size_t index = hash(key);
+        if(is_present(key)){
+            found = true;
+            typename std::list<RecordType>::const_iterator iter;
+            for(iter = data[index].begin(); iter != data[index].end(); ++iter){
+                if(iter->key == key)
+                    result = *iter;
+                    return;
+            }
+        }
+        else
+            found = false;
+    }
+    
+    template <class RecordType>     
+    bool table<RecordType>::is_present(int key) const
+    {
+        std::size_t index = hash(key);
+        typename std::list<RecordType>::const_iterator iter;
+        for(iter = data[index].begin(); iter != data[index].end(); ++iter){
+            if(iter->key == key)
+                return true;
+        }
+        return false;        
+    }
+    
+    template <class RecordType>
+    std::size_t table<RecordType>::hash(int key) const
+    {
+        return (key % TABLE_SIZE);
+    }
+
+}
